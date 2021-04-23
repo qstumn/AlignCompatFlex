@@ -64,3 +64,5 @@ RenderObject的这一套我们就非常熟悉了，所以直接看RenderFlex的`
 然后重新测量child，非Align类型的child依然用原约束测量，而Align我们直接使用crossSize作为约束的maxHeight即可，当然最后不要忘了把size中height换成我们自己计算的crossSize。
 
 <br/>要达成这样的效果我们需要写一个继承自Row或Column的子类，非常简单，完整代码请移步：https://github.com/qstumn/AlignCompatFlex
+
+ps：本文flex.dart源码基于flutter 1.22.6版本
