@@ -1,0 +1,2 @@
+# AlignCompatFlex
+Flutter库，可以在Row或Column的children中使用Align依然可以使它们能自适应高度或宽度
