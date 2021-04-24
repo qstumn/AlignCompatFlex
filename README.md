@@ -61,7 +61,9 @@ RenderObject的这一套我们就非常熟悉了，所以直接看RenderFlex的`
 ```
 这个方法代码非常的多，直接通读会很难受，但好在关键点的代码非常的好找，可以看到759行会循环所有子child进行测量，同时把最大的子child高度记录在`crossSize`中，接着在865行通过crossSize确定自己的高度。
 <br/>所以关键点就在child.layout，我们可以重写这个过程，在计算crossSize的时候把Align排除出去，只计算非Align类型的child，这样crossSize记录的就是除去Align以外最高的child。
-然后重新测量child，非Align类型的child依然用原约束测量，而Align我们直接使用crossSize作为约束的maxHeight即可，当然最后不要忘了把size中height换成我们自己计算的crossSize。
+然后对Align类型的child重新测量，直接使用crossSize作为约束的maxHeight即可。
+而对于非Align类型的child则需要重新布局，这是因为它们的offset已经被Align污染，这很简单，新的offset的width取旧值即可，height可以根据我们自己的crossSize重新计算，当然最后不要忘了把size中height换成我们自己计算的crossSize。
+<br/>Axis.vertical方向的Column处理方式和以上同理。
 
 <br/>要达成这样的效果我们需要写一个继承自Row或Column的子类，非常简单，完整代码请移步：https://github.com/qstumn/AlignCompatFlex
 
