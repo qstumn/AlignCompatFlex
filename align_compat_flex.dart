@@ -121,29 +121,56 @@ class _RenderFlex extends RenderFlex {
   void performLayout() {
     super.performLayout();
     var child = firstChild;
-    final positionedBoxs = <RenderPositionedBox>[];
     var crossSize = 0.0;
     while (child != null) {
-      final FlexParentData childParentData = child.parentData;
-      if (child is RenderPositionedBox) {
-        positionedBoxs.add(child);
-      } else {
+      final childParentData = child.parentData as FlexParentData;
+      if (child is! RenderPositionedBox) {
         crossSize = math.max(crossSize, _getCrossSize(child));
       }
       child = childParentData.nextSibling;
     }
-    positionedBoxs.forEach((box) {
-      BoxConstraints innerConstraints;
-      switch (direction) {
-        case Axis.horizontal:
-          innerConstraints = BoxConstraints.tightFor(height: crossSize);
-          break;
-        case Axis.vertical:
-          innerConstraints = BoxConstraints.tightFor(width: crossSize);
-          break;
+    child = firstChild;
+    while (child != null) {
+      final childParentData = child.parentData as FlexParentData;
+
+      if (child is RenderPositionedBox) {
+        BoxConstraints innerConstraints = direction == Axis.horizontal
+            ? BoxConstraints.tightFor(height: crossSize)
+            : BoxConstraints.tightFor(width: crossSize);
+        child.layout(innerConstraints, parentUsesSize: true);
+      } else {
+        double childCrossPosition = 0;
+        switch (crossAxisAlignment) {
+          case CrossAxisAlignment.start:
+            childCrossPosition = 0;
+            break;
+          case CrossAxisAlignment.end:
+            childCrossPosition = crossSize - _getCrossSize(child);
+            break;
+          case CrossAxisAlignment.center:
+            childCrossPosition = crossSize / 2.0 - _getCrossSize(child) / 2.0;
+            break;
+          case CrossAxisAlignment.stretch:
+            childCrossPosition = 0.0;
+            break;
+          case CrossAxisAlignment.baseline:
+          //TODO not supported yet
+        }
+        switch (direction) {
+          case Axis.horizontal:
+            childParentData.offset =
+                Offset(childParentData.offset.dx, childCrossPosition);
+            break;
+          case Axis.vertical:
+            childParentData.offset =
+                Offset(childCrossPosition, childParentData.offset.dy);
+            break;
+        }
       }
-      box.layout(innerConstraints, parentUsesSize: true);
-    });
-    size = constraints.constrain(Size(size.width, crossSize));
+      child = childParentData.nextSibling;
+    }
+    size = constraints.constrain(direction == Axis.horizontal
+        ? Size(size.width, crossSize)
+        : Size(crossSize, size.height));
   }
 }
